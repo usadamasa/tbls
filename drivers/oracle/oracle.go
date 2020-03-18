@@ -33,12 +33,12 @@ func (o *Oracle) Analyze(s *schema.Schema) error {
 	// Get schemas
 	tableRows, err := o.db.Query(`
 		SELECT
-			TABLE_NAME,
-			TABLE_TYPE,
-			COMMENTS
-		FROM DBA_TAB_COMMENTS
+			table_name,
+			table_type,
+			comments
+		FROM dba_tab_comments
 		WHERE owner = :owner_name
-		ORDER BY TABLE_NAME
+		ORDER BY table_name
 		`, sql.Named("owner_name", s.Name))
 	if err != nil {
 		return errors.WithStack(err)
@@ -65,21 +65,23 @@ func (o *Oracle) Analyze(s *schema.Schema) error {
 
 		// columns and comments
 		columnRows, err := o.db.Query(`
-			select
-				COLUMN_NAME,
-				DATA_TYPE,
--- 				DATA_LENGTH,
--- 				DATA_PRECISION,
--- 				DATA_SCALE,
-				NULLABLE,
--- 				COLUMN_ID,
-				DATA_DEFAULT
--- 				CHAR_LENGTH
-				
-			from DBA_TAB_COLUMNS
-			where
-				OWNER = :owner and
-				TABLE_NAME= :table_name
+		SELECT
+			col.column_name,
+			col.data_type,
+			col.nullable,
+			col.data_default,
+			com.comments
+		FROM
+			dba_tab_columns col
+			JOIN dba_col_comments com
+			ON
+				col.owner = com.owner AND
+				col.table_name = com.table_name AND
+				col.column_name = com.column_name
+		WHERE
+			col.owner = :owner AND
+			col.table_name= :table_name
+		ORDER BY col.column_id
 		`,
 			sql.Named("owner", s.Name),
 			sql.Named("table_name", tableName),
@@ -97,7 +99,7 @@ func (o *Oracle) Analyze(s *schema.Schema) error {
 				columnType    string
 				columnComment sql.NullString
 			)
-			err = columnRows.Scan(&columnName, &columnType, &isNullable, &columnDefault)
+			err = columnRows.Scan(&columnName, &columnType, &isNullable, &columnDefault, &columnComment)
 			if err != nil {
 				return errors.WithStack(err)
 			}
