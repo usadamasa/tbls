@@ -62,6 +62,57 @@ func (o *Oracle) Analyze(s *schema.Schema) error {
 			Type:    tableType,
 			Comment: tableComment,
 		}
+
+		// columns and comments
+		columnRows, err := o.db.Query(`
+			select
+				COLUMN_NAME,
+				DATA_TYPE,
+-- 				DATA_LENGTH,
+-- 				DATA_PRECISION,
+-- 				DATA_SCALE,
+				NULLABLE,
+-- 				COLUMN_ID,
+				DATA_DEFAULT
+-- 				CHAR_LENGTH
+				
+			from DBA_TAB_COLUMNS
+			where
+				OWNER = :owner and
+				TABLE_NAME= :table_name
+		`,
+			sql.Named("owner", s.Name),
+			sql.Named("table_name", tableName),
+		)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		defer columnRows.Close()
+		columns := []*schema.Column{}
+		for columnRows.Next() {
+			var (
+				columnName    string
+				columnDefault sql.NullString
+				isNullable    string
+				columnType    string
+				columnComment sql.NullString
+			)
+			err = columnRows.Scan(&columnName, &columnType, &isNullable, &columnDefault)
+			if err != nil {
+				return errors.WithStack(err)
+			}
+			column := &schema.Column{
+				Name:     columnName,
+				Type:     columnType,
+				Nullable: convertColumnNullable(isNullable),
+				Default:  columnDefault,
+				Comment:  columnComment.String,
+			}
+
+			columns = append(columns, column)
+		}
+		table.Columns = columns
+
 		tables = append(tables, table)
 	}
 	s.Tables = tables
@@ -83,4 +134,11 @@ func (o *Oracle) Info() (*schema.Driver, error) {
 		DatabaseVersion: v,
 	}
 	return d, nil
+}
+
+func convertColumnNullable(str string) bool {
+	if str == "N" {
+		return false
+	}
+	return true
 }
