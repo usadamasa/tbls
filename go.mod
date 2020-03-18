@@ -4,13 +4,14 @@ require (
 	cloud.google.com/go v0.53.0 // indirect
 	cloud.google.com/go/bigquery v1.4.0
 	cloud.google.com/go/spanner v1.2.1
-	github.com/aws/aws-sdk-go v1.20.21
+	github.com/aws/aws-sdk-go v1.27.0
 	github.com/denisenkom/go-mssqldb v0.0.0-20200206145737-bbfc9a55622e
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gobuffalo/packr/v2 v2.8.0
 	github.com/goccy/go-graphviz v0.0.4
 	github.com/goccy/go-yaml v1.4.3
+	github.com/godror/godror v0.13.2 // indirect
 	github.com/google/go-cmp v0.4.0
 	github.com/labstack/gommon v0.3.0
 	github.com/lib/pq v1.3.0

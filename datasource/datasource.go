@@ -18,6 +18,7 @@ import (
 	"github.com/k1LoW/tbls/drivers/dynamo"
 	"github.com/k1LoW/tbls/drivers/mssql"
 	"github.com/k1LoW/tbls/drivers/mysql"
+	"github.com/k1LoW/tbls/drivers/oracle"
 	"github.com/k1LoW/tbls/drivers/postgres"
 	"github.com/k1LoW/tbls/drivers/redshift"
 	"github.com/k1LoW/tbls/drivers/spanner"
@@ -79,6 +80,9 @@ func Analyze(urlstr string) (*schema.Schema, error) {
 	case "mssql":
 		s.Name = splitted[1]
 		driver = mssql.New(db)
+	case "godror":
+		s.Name = splitted[1]
+		driver = oracle.New(db)
 	default:
 		return s, errors.WithStack(fmt.Errorf("unsupported driver '%s'", u.Driver))
 	}
