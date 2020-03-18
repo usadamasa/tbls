@@ -9,7 +9,7 @@ import (
 
 func TestDistance(t *testing.T) {
 	dsn := "json://../testdata/testdb.json"
-	s, err := datasource.Analyze(dsn)
+	s, err := datasource.Analyze(dsn, "")
 	if err != nil {
 		t.Errorf("%s", err)
 	}

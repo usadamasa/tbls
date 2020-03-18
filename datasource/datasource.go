@@ -29,7 +29,7 @@ import (
 )
 
 // Analyze database
-func Analyze(urlstr string) (*schema.Schema, error) {
+func Analyze(urlstr string, anotherSchemaName string) (*schema.Schema, error) {
 	if strings.Index(urlstr, "json://") == 0 {
 		return AnalyzeJSON(urlstr)
 	}
@@ -53,10 +53,10 @@ func Analyze(urlstr string) (*schema.Schema, error) {
 	}
 
 	db, err := dburl.Open(urlstr)
-	defer db.Close()
 	if err != nil {
 		return s, errors.WithStack(err)
 	}
+	defer db.Close()
 	if err = db.Ping(); err != nil {
 		return s, errors.WithStack(err)
 	}
@@ -81,7 +81,11 @@ func Analyze(urlstr string) (*schema.Schema, error) {
 		s.Name = splitted[1]
 		driver = mssql.New(db)
 	case "godror":
-		s.Name = splitted[1]
+		if anotherSchemaName == "" {
+			s.Name = splitted[1]
+		} else {
+			s.Name = anotherSchemaName
+		}
 		driver = oracle.New(db)
 	default:
 		return s, errors.WithStack(fmt.Errorf("unsupported driver '%s'", u.Driver))

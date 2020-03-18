@@ -56,7 +56,7 @@ var lintCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		s, err := datasource.Analyze(c.DSN)
+		s, err := datasource.Analyze(c.DSN, "")
 		if err != nil {
 			printError(err)
 			os.Exit(1)

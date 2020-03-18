@@ -44,7 +44,7 @@ func TestMain(m *testing.M) {
 
 func TestAnalyzeSchema(t *testing.T) {
 	for _, tt := range tests {
-		schema, err := Analyze(tt.dsn)
+		schema, err := Analyze(tt.dsn, "")
 		if err != nil {
 			t.Errorf("%s", err)
 		}
@@ -58,7 +58,7 @@ func TestAnalyzeSchema(t *testing.T) {
 
 func TestAnalyzeTables(t *testing.T) {
 	for _, tt := range tests {
-		schema, err := Analyze(tt.dsn)
+		schema, err := Analyze(tt.dsn, "")
 		if err != nil {
 			t.Errorf("%s", err)
 		}
@@ -72,7 +72,7 @@ func TestAnalyzeTables(t *testing.T) {
 
 func TestAnalyzeRelations(t *testing.T) {
 	for _, tt := range tests {
-		schema, err := Analyze(tt.dsn)
+		schema, err := Analyze(tt.dsn, "")
 		if err != nil {
 			t.Errorf("%s", err)
 		}

@@ -1,17 +1,16 @@
 package oracle
 
-import "database/sql"
-
 import (
-	_ "github.com/godror/godror"
+	"database/sql"
+	"regexp"
+
 	"github.com/k1LoW/tbls/schema"
 	"github.com/pkg/errors"
-	"regexp"
 )
 
 var reFK = regexp.MustCompile(`FOREIGN KEY \((.+)\) REFERENCES ([^\s]+)\s?\((.+)\)`)
 
-// oracle struct
+// Oracle struct
 type Oracle struct {
 	db *sql.DB
 }
@@ -30,6 +29,43 @@ func (o *Oracle) Analyze(s *schema.Schema) error {
 		return errors.WithStack(err)
 	}
 	s.Driver = d
+
+	// Get schemas
+	tableRows, err := o.db.Query(`
+		SELECT
+			TABLE_NAME,
+			TABLE_TYPE,
+			COMMENTS
+		FROM DBA_TAB_COMMENTS
+		WHERE owner = :owner_name
+		ORDER BY TABLE_NAME
+		`, sql.Named("owner_name", s.Name))
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	defer tableRows.Close()
+
+	tables := []*schema.Table{}
+
+	for tableRows.Next() {
+		var (
+			tableName    string
+			tableType    string
+			tableComment string
+		)
+		err := tableRows.Scan(&tableName, &tableType, &tableComment)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		table := &schema.Table{
+			Name:    tableName,
+			Type:    tableType,
+			Comment: tableComment,
+		}
+		tables = append(tables, table)
+	}
+	s.Tables = tables
+
 	return nil
 }
 

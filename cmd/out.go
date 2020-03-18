@@ -41,10 +41,11 @@ import (
 )
 
 var (
-	format    string
-	outPath   string
-	tableName string
-	distance  int
+	format     string
+	outPath    string
+	tableName  string
+	schemaName string
+	distance   int
 )
 
 // outCmd represents the doc command
@@ -76,7 +77,7 @@ var outCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		s, err := datasource.Analyze(c.DSN)
+		s, err := datasource.Analyze(c.DSN, schemaName)
 		if err != nil {
 			printError(err)
 			os.Exit(1)
@@ -167,6 +168,7 @@ func loadOutArgs(args []string) ([]config.Option, error) {
 
 func init() {
 	rootCmd.AddCommand(outCmd)
+	outCmd.Flags().StringVarP(&schemaName, "schema", "", "", "specific another schema")
 	outCmd.Flags().BoolVarP(&sort, "sort", "", false, "sort")
 	outCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	outCmd.Flags().StringVarP(&format, "format", "t", "json", "output format")
